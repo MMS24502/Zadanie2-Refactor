@@ -28,23 +28,8 @@ namespace LegacyApp
                 LastName = lastName
             };
             
-            //BL + INF
-            if (client.Type == "VeryImportantClient")
-            {
-                user.HasCreditLimit = false;
-            }
-            else if (client.Type == "ImportantClient")
-            {
-                int creditLimit = clientService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                creditLimit = creditLimit * 2;
-                user.CreditLimit = creditLimit;
-            }
-            else
-            {
-                user.HasCreditLimit = true;
-                int creditLimit = clientService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                user.CreditLimit = creditLimit;
-            }
+            //BL
+            user = ApplyCreditLimitStrategy(user, client);
             
             //BL - walidacja CreditLimit
             if (user.HasCreditLimit && user.CreditLimit < 500)
@@ -56,6 +41,31 @@ namespace LegacyApp
             UserDataAccess.AddUser(user);
             
             return true;
+        }
+        private User ApplyCreditLimitStrategy(User user, Client client)
+        {
+            switch (client.Type)
+            {
+                case "VeryImportantClient":
+                    user.HasCreditLimit = false;
+                    break;
+                case "ImportantClient":
+                {
+                    int creditLimit = clientService.GetCreditLimit(user.LastName, user.DateOfBirth);
+                    creditLimit *= 2;
+                    user.CreditLimit = creditLimit;
+                    break;
+                }
+                default:
+                {
+                    user.HasCreditLimit = true;
+                    int creditLimit = clientService.GetCreditLimit(user.LastName, user.DateOfBirth);
+                    user.CreditLimit = creditLimit;
+                    break;
+                }
+            }
+
+            return user;
         }
     }
 }
