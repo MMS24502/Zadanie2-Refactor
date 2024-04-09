@@ -6,16 +6,19 @@ namespace LegacyApp
     {
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
+            //BL - walidacja użytkownika
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
             {
                 return false;
             }
 
+            //BL - walidacja maila
             if (!email.Contains("@") && !email.Contains("."))
             {
                 return false;
             }
 
+            //BL - walidacja wieku
             var now = DateTime.Now;
             int age = now.Year - dateOfBirth.Year;
             if (now.Month < dateOfBirth.Month || (now.Month == dateOfBirth.Month && now.Day < dateOfBirth.Day)) age--;
@@ -25,6 +28,7 @@ namespace LegacyApp
                 return false;
             }
 
+            //INF
             var clientRepository = new ClientRepository();
             var client = clientRepository.GetById(clientId);
 
@@ -37,6 +41,7 @@ namespace LegacyApp
                 LastName = lastName
             };
             
+            //BL + INF
             if (client.Type == "VeryImportantClient")
             {
                 user.HasCreditLimit = false;
@@ -60,12 +65,15 @@ namespace LegacyApp
                 }
             }
             
+            //BL - walidacja CreditLimit
             if (user.HasCreditLimit && user.CreditLimit < 500)
             {
                 return false;
             }
 
+            //INF
             UserDataAccess.AddUser(user);
+            
             return true;
         }
     }
