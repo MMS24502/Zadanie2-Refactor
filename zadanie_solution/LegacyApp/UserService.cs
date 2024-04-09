@@ -2,8 +2,12 @@
 
 namespace LegacyApp
 {
-    public class UserService
+    public class UserService(IClientRepository clientRepository, ICreditLimitService clientService)
     {
+        public UserService() : this(new ClientRepository(), new UserCreditService())
+        {
+        }
+
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
             //BL - walidacja użytkownika
@@ -29,7 +33,6 @@ namespace LegacyApp
             }
 
             //INF
-            var clientRepository = new ClientRepository();
             var client = clientRepository.GetById(clientId);
 
             var user = new User
@@ -48,21 +51,15 @@ namespace LegacyApp
             }
             else if (client.Type == "ImportantClient")
             {
-                using (var userCreditService = new UserCreditService())
-                {
-                    int creditLimit = userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                    creditLimit = creditLimit * 2;
-                    user.CreditLimit = creditLimit;
-                }
+                int creditLimit = clientService.GetCreditLimit(user.LastName, user.DateOfBirth);
+                creditLimit = creditLimit * 2;
+                user.CreditLimit = creditLimit;
             }
             else
             {
                 user.HasCreditLimit = true;
-                using (var userCreditService = new UserCreditService())
-                {
-                    int creditLimit = userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                    user.CreditLimit = creditLimit;
-                }
+                int creditLimit = clientService.GetCreditLimit(user.LastName, user.DateOfBirth);
+                user.CreditLimit = creditLimit;
             }
             
             //BL - walidacja CreditLimit
