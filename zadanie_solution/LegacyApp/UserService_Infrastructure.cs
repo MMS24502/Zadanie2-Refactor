@@ -9,5 +9,5 @@ public interface IClientRepository
 
 public interface ICreditLimitService
 {
-    int GetCreditLimit(string LastName, DateTime birthday );
+    int GetCreditLimit(string lastName, DateTime birthday );
 }
